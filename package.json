@@ -1,7 +1,6 @@
 {
   "name": "sourcetab",
   "private": true,
-  "version": "3.3.0",
   "scripts": {
     "test": "xo --fix",
     "build": "npm run build:web -w client && npm run build -w website"
@@ -12,8 +11,8 @@
     "website"
   ],
   "dependencies": {
-    "eslint-plugin-solid": "^0.12.1",
-    "xo": "^0.54.1"
+    "eslint-plugin-solid": "^0.13.2",
+    "xo": "^0.58.0"
   },
   "prettier": {
     "bracketSpacing": false,

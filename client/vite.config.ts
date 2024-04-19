@@ -10,7 +10,7 @@ const platform =
 
 export default defineConfig({
   plugins: [
-    solidPlugin(),
+    solidPlugin() as PluginOption,
     visualizer({
       filename: 'dist/stats.html',
     }) as PluginOption,
@@ -19,8 +19,16 @@ export default defineConfig({
     port: 3000,
   },
   build: {
+    rollupOptions: {
+      input: {
+        index: resolve(platform === 'web' ? 'index.html' : 'index-webext.html'),
+      },
+    },
     outDir: `dist/${platform}`,
     target: 'esnext',
+  },
+  esbuild: {
+    legalComments: 'none',
   },
   resolve: {
     alias: {

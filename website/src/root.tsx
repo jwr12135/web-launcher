@@ -14,7 +14,7 @@ import {
   Title,
 } from 'solid-start';
 import '@fontsource-variable/nunito';
-import Header from '~/components/Header';
+import Header from '~/app/components/Header';
 import './root.css';
 
 const Root: Component = () => {
