@@ -7,6 +7,7 @@ import {authStatusResource} from '~/api/globalResources';
 import {ErrorMessage} from '~/components/ui/ErrorMessage';
 import {CardTitle} from '~/components/ui/Card';
 import {Title} from '~/components/Title';
+import {regexpUsernameStrict} from '~/utils/utils';
 
 const RegisterPage: Component = () => {
   const [status] = authStatusResource;
@@ -33,11 +34,24 @@ const RegisterPage: Component = () => {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+
+            setError('');
+
             try {
-              setError('');
+              if (!regexpUsernameStrict.test(username())) {
+                throw new Error(
+                  'Username must be 4-32 characters and contain only letters, numbers, and underscores',
+                );
+              }
+
+              if (password().length < 8) {
+                throw new Error('Password must be at least 8 characters');
+              }
+
               if (password() !== confirmPassword()) {
                 throw new Error("Confirm password doesn't match");
               }
+
               await api.authRegister(
                 username(),
                 email(),
@@ -55,6 +69,7 @@ const RegisterPage: Component = () => {
           <Inputs.Text
             value={username()}
             onChange={(e) => setUsername(e.target.value)}
+            required
           >
             Username
           </Inputs.Text>
@@ -62,6 +77,7 @@ const RegisterPage: Component = () => {
             type='email'
             value={email()}
             onChange={(e) => setEmail(e.target.value)}
+            required
           >
             Email
           </Inputs.Text>
@@ -69,6 +85,7 @@ const RegisterPage: Component = () => {
             type='password'
             value={password()}
             onChange={(e) => setPassword(e.target.value)}
+            required
           >
             Password
           </Inputs.Text>
@@ -76,6 +93,7 @@ const RegisterPage: Component = () => {
             type='password'
             value={confirmPassword()}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
           >
             Confirm Password
           </Inputs.Text>

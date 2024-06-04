@@ -16,6 +16,7 @@ import {
 } from './components/ui/DropdownMenu';
 import {Icon} from './components/ui/Icon';
 import {Title} from './components/Title';
+import {regexpUsernameWithAt} from './utils/utils';
 
 const Shell: ParentComponent = (props) => {
   const [authStatus] = authStatusResource;
@@ -104,7 +105,7 @@ const Routes: Component = () => (
         path=':username'
         component={lazy(async () => import('./pages/users/UserPage'))}
         matchFilters={{
-          username: /^@[\w\d]+$/,
+          username: regexpUsernameWithAt,
         }}
       />
       <Route path='**' component={NotFoundPage} />

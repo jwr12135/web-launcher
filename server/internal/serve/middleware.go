@@ -170,6 +170,11 @@ func spaMiddleware(next http.Handler, publicFS fs.FS) http.Handler {
 			r.URL.Path = "/"
 		}
 
+		// All files in assets dir should contain a filename fingerprint
+		if strings.HasPrefix(p, "assets/") {
+			w.Header().Add("Cache-Control", "public,max-age=31536000,immutable")
+		}
+
 		if etags[p] == "" {
 			h := md5.New()
 			f, err := publicFS.Open(p)
@@ -184,12 +189,12 @@ func spaMiddleware(next http.Handler, publicFS fs.FS) http.Handler {
 			etags[p] = fmt.Sprintf("%x", h.Sum(nil))
 		}
 
-		if match := r.Header.Get("If-None-Match"); match == etags[p] {
+		w.Header().Add("ETag", etags[p])
+
+		if etags[p] == r.Header.Get("If-None-Match") {
 			w.WriteHeader(http.StatusNotModified)
 			return
 		}
-
-		w.Header().Add("ETag", etags[p])
 
 		next.ServeHTTP(w, r)
 	})

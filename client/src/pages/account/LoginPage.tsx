@@ -34,6 +34,7 @@ export const LoginSection: Component = () => {
         <Inputs.Text
           value={username()}
           onChange={(e) => setUsername(e.target.value)}
+          required
         >
           Username
         </Inputs.Text>
@@ -41,6 +42,7 @@ export const LoginSection: Component = () => {
           type='password'
           value={password()}
           onChange={(e) => setPassword(e.target.value)}
+          required
         >
           Password
         </Inputs.Text>

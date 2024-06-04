@@ -2,6 +2,7 @@ package serve
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -13,7 +14,7 @@ import (
 var AdminRegisterCode uuid.UUID
 
 type registerParams struct {
-	Username  string `json:"username" validate:"required,min=3"`
+	Username  string `json:"username" validate:"required"`
 	Email     string `json:"email" validate:"required,email"`
 	Password  string `json:"password" validate:"required,min=8"`
 	AdminCode string `json:"adminCode"`
@@ -31,23 +32,35 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	err = validate.Struct(params)
 	if err != nil {
+		slog.Error(err.Error())
+		utils.ClientError(w, http.StatusBadRequest)
+		return
+	}
+	if !utils.RegexpUsernameStrict.MatchString(params.Username) {
 		utils.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
 	isAdmin := false
 	if params.AdminCode != "" {
+		// Make sure the admin invite actually is active
+		if AdminRegisterCode == uuid.Nil {
+			utils.ClientError(w, http.StatusForbidden)
+			return
+		}
+
 		adminCodeUUID, err := uuid.Parse(params.AdminCode)
 		if err != nil {
 			utils.ClientError(w, http.StatusForbidden)
 			return
 		}
-		if adminCodeUUID == AdminRegisterCode {
-			isAdmin = true
-		} else {
+
+		if adminCodeUUID != AdminRegisterCode {
 			utils.ClientError(w, http.StatusForbidden)
 			return
 		}
+
+		isAdmin = true
 	}
 
 	user := models.User{
@@ -73,13 +86,12 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	if isAdmin {
-		AdminRegisterCode = uuid.UUID{}
+		AdminRegisterCode = uuid.Nil
 	}
 }
 
-// TODO: Add password min length here
 type loginParams struct {
-	Username string `json:"username" validate:"required,min=3"`
+	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
 
